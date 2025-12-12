@@ -4,18 +4,22 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "Sport_Type")
+@Table(name = "Court")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SportType {
+public class Court {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer sport_type_id;
+    private Integer court_id;
 
-    private String sport_name;
+    private String court_name;
 
     private Boolean is_deleted = false;
+
+    @ManyToOne
+    @JoinColumn(name = "sport_type_id")
+    private SportType sportType;
 }
