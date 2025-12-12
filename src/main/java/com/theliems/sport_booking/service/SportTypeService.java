@@ -29,8 +29,8 @@ public class SportTypeService {
         SportType existing = repository.findById(id).orElse(null);
         if (existing == null) return null;
 
-        existing.setSportName(sportType.getSportName());
-        existing.setIsDeleted(sportType.getIsDeleted());
+        existing.setSport_name(sportType.getSport_name());
+        existing.setIs_deleted(sportType.getIs_deleted());
 
         return repository.save(existing);
     }

@@ -84,19 +84,23 @@
 
     <h2 class="form-title">Create Sport Type</h2>
 
-    <form th:action="@{/admin/sport-type/create}" method="post">
+    <form th:action="@{/admin/sport-type/create}"
+          th:object="${sportType}"
+          method="post">
 
         <div class="form-group">
             <label class="form-label">Sport Name</label>
+
+            <!-- BẮT BUỘC dùng th:field -->
             <input type="text"
                    class="form-control"
-                   name="sportName"
+                   th:field="*{sport_name}"
                    required>
         </div>
 
         <div class="btn-area">
-            <a href="/admin/sport-type" class="btn-back">← Back</a>
-            <button class="btn-green">Create</button>
+            <a th:href="@{/admin/sport-type}" class="btn-back">← Back</a>
+            <button type="submit" class="btn-green">Create</button>
         </div>
 
     </form>

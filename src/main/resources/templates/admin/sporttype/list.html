@@ -195,7 +195,7 @@
 
         <div class="page-header">
             <h2 class="page-title">Sport Types</h2>
-            <a href="/admin/sport-type/create" class="add-btn">+ Add Sport Type</a>
+            <a th:href="@{/admin/sport-type/create}" class="add-btn">+ Add Sport Type</a>
         </div>
 
         <div class="table-container">
@@ -212,19 +212,21 @@
 
                 <tbody>
                 <tr th:each="s : ${list}">
-                    <td th:text="${s.id}"></td>
-                    <td th:text="${s.sportName}"></td>
+                    <td th:text="${s.sport_type_id}"></td>
+                    <td th:text="${s.sport_name}"></td>
 
                     <td>
-                        <span class="badge bg-success" th:if="${!s.isDeleted}">Active</span>
-                        <span class="badge bg-secondary" th:if="${s.isDeleted}">Deleted</span>
+                        <span class="badge bg-success" th:if="${!s.is_deleted}">Active</span>
+                        <span class="badge bg-secondary" th:if="${s.is_deleted}">Deleted</span>
                     </td>
 
                     <td>
-                        <a th:href="@{'/admin/sport-type/edit/' + ${s.id}}" class="btn-edit">Edit</a>
+                        <a th:href="@{'/admin/sport-type/edit/' + ${s.sport_type_id}}"
+                           class="btn-edit">Edit</a>
 
-                        <button th:onclick="'deleteItem(' + ${s.id} + ')'"
-                                class="btn btn-danger btn-action btn-sm" style="margin-left: 8px;">
+                        <button th:onclick="'deleteItem(' + ${s.sport_type_id} + ')'"
+                                class="btn btn-danger btn-action btn-sm"
+                                style="margin-left: 8px;">
                             Delete
                         </button>
                     </td>
