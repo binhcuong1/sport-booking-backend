@@ -1,22 +1,24 @@
-<a href="https://colorlib.com/wp/templates/"><img
-        src="https://colorlib.com/wp/wp-content/uploads/sites/2/colorlib-push-logo.png" alt="Colorlib logo"></a>
-<h1 style="text-align:center;">Thank you for using our template!</h1>
-<p style="text-align:center;">For more awesome templates please visit <strong><a
-        href="https://colorlib.com/wp/templates/">Colorlib</a></strong>.</p>
-<br>
-<p style="text-align:center; color:red;"><strong>Copyright information for the template can't be altered/removed unless
-    you purchase a license.</strong>
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>HTVC - Đặt sân thể thao</title>
 
-<p style="text-align:center;"><strong>Removing copyright information without the license will result in suspension of
-    your hosting and/or domain name(s).</strong>
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
 
-<p style="text-align:center;"><strong>More information about the license is available <a
-        href="https://colorlib.com/wp/licence/">here</a></strong>.</p>
+<body>
 
-<style>
-    img {
-      margin: 0 auto;
-      display: block;
-      margin-top: 20%;
-    }
-</style>
+    <!-- CONTENT -->
+    <div th:replace="~{::content}"></div>
+
+    <!-- JS -->
+    <script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/main.js}"></script>
+
+</body>
+</html>
