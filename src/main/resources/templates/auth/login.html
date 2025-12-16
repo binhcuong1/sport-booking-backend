@@ -1,10 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Đăng nhập</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
 </head>
-<body>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="col-md-4 mx-auto">
+        <h3 class="text-center mb-4">Đăng nhập</h3>
+
+        <input id="email" class="form-control mb-3" type="email" placeholder="Email">
+        <input id="password" class="form-control mb-3" type="password" placeholder="Mật khẩu">
+
+        <button class="btn btn-primary w-100" onclick="login()">Đăng nhập</button>
+
+        <p id="msg" class="text-danger mt-3 text-center"></p>
+    </div>
+</div>
+
+<script>
+    const API = "http://localhost:9999/api/auth";
+
+    function login() {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        fetch(API + "/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        })
+        .then(res => res.json())
+        .then(data => {
+            localStorage.setItem("token", data.token);
+            document.getElementById("msg").innerText = "Đăng nhập thành công!";
+            console.log("JWT:", data.token);
+        })
+        .catch(() => {
+            document.getElementById("msg").innerText = "Sai email hoặc mật khẩu";
+        });
+    }
+</script>
 
 </body>
 </html>

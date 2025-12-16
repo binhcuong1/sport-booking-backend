@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Xác thực OTP</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="col-md-4 mx-auto">
+        <h3 class="text-center mb-4">Xác thực OTP</h3>
+
+        <input id="otp" class="form-control mb-3" placeholder="Nhập mã OTP">
+
+        <button class="btn btn-success w-100" onclick="verifyOtp()">Xác thực</button>
+
+        <p id="msg" class="text-danger mt-3 text-center"></p>
+    </div>
+</div>
+
+<script>
+    const API = "http://localhost:9999/api/auth";
+
+    function verifyOtp() {
+        const email = localStorage.getItem("otp_email");
+        const otp = document.getElementById("otp").value;
+
+        fetch(API + "/verify-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, otp })
+        })
+        .then(res => res.text())
+        .then(msg => {
+            window.location.href = "/auth/login.html";
+        })
+        .catch(() => {
+            document.getElementById("msg").innerText = "OTP không đúng hoặc hết hạn";
+        });
+    }
+</script>
+
+</body>
+</html>

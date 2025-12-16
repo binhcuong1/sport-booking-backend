@@ -1,10 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Đăng ký</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
 </head>
-<body>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="col-md-4 mx-auto">
+        <h3 class="text-center mb-4">Đăng ký</h3>
+
+        <input id="email" class="form-control mb-3" type="email" placeholder="Email">
+        <input id="password" class="form-control mb-3" type="password" placeholder="Mật khẩu">
+
+        <button class="btn btn-primary w-100" onclick="register()">Đăng ký</button>
+
+        <p id="msg" class="text-danger mt-3 text-center"></p>
+    </div>
+</div>
+
+<script>
+    const API = "http://localhost:9999/api/auth";
+
+    function register() {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        fetch(API + "/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        })
+        .then(res => res.text())
+        .then(msg => {
+            localStorage.setItem("otp_email", email);
+            window.location.href = "/auth/verify.html";
+        })
+        .catch(() => {
+            document.getElementById("msg").innerText = "Đăng ký thất bại";
+        });
+    }
+</script>
 
 </body>
 </html>

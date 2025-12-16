@@ -1,5 +1,6 @@
 package com.theliems.sport_booking.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,12 +14,14 @@ public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer account_id;
+    @Column(name = "account_id")
+    private Integer accountId;
 
     @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)

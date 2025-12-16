@@ -21,7 +21,7 @@ public class Profile {
     private Gender gender = Gender.unknown;
 
     public enum Gender {
-        male, female, unknown
+        nam, nu, unknown
     }
 
     private String avatar_url;

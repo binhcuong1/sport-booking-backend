@@ -33,7 +33,7 @@ build/
 .vscode/
 
 ### Spring Boot ###
-application.properties
+
 application.yml
-application-*.properties
+
 application-*.yml
