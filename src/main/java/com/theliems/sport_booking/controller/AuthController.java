@@ -1,11 +1,16 @@
 package com.theliems.sport_booking.controller;
 
 import com.theliems.sport_booking.model.Account;
+import com.theliems.sport_booking.model.Club;
+import com.theliems.sport_booking.repository.ClubRepository;
+import com.theliems.sport_booking.repository.AccountClubRepository;
 import com.theliems.sport_booking.service.AuthService;
 import com.theliems.sport_booking.service.JwtService;
+import com.theliems.sport_booking.model.AccountClub;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -14,10 +19,16 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtService jwtService;
+    private final AccountClubRepository accountClubRepo;
+    private final ClubRepository clubRepo;
 
-    public AuthController(AuthService authService, JwtService jwtService) {
+    public AuthController(AuthService authService, JwtService jwtService,
+                          AccountClubRepository accountClubRepo,
+                          ClubRepository clubRepo) {
         this.authService = authService;
         this.jwtService = jwtService;
+        this.accountClubRepo = accountClubRepo;
+        this.clubRepo = clubRepo;
     }
 
     // register
@@ -52,13 +63,30 @@ public class AuthController {
 
         Account account = authService.login(email, password);
         String token = jwtService.generateToken(account);
+
+        List<Integer> clubIds = accountClubRepo
+                .findByAccountIdAndIsDeletedFalse(account.getAccountId())
+                .stream()
+                .map(AccountClub::getClubId)
+                .toList();
+
+        List<Club> clubEntities = clubRepo.findAllById(clubIds);
+
+        var clubs = clubEntities.stream()
+                .map(c -> Map.of(
+                        "id", c.getClubId(),
+                        "name", c.getClubName()
+                ))
+                .toList();
+
         return ResponseEntity.ok(Map.of(
                 "token", token,
                 "account", Map.of(
                         "id", account.getAccountId(),
                         "email", account.getEmail(),
                         "role", account.getRole()
-                )
+                ),
+                "clubs", clubs
         ));
     }
     @PostMapping("/google")
