@@ -14,20 +14,26 @@ public class Club {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer club_id;
+    @Column(name = "club_id")
+    private Integer clubId;
 
-    private String club_name;
+    @Column(name = "club_name")
+    private String clubName;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
     private String address;
 
-    private LocalTime open_time;
+    @Column(name = "open_time")
+    private LocalTime openTime;
 
-    private LocalTime close_time;
+    @Column(name = "close_time")
+    private LocalTime closeTime;
 
-    private String contact_phone;
+    @Column(name = "contact_phone")
+    private String contactPhone;
 
-    private Boolean is_deleted = false;
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
 }
