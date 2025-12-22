@@ -1,14 +1,17 @@
 package com.theliems.sport_booking.controller;
 
 import com.theliems.sport_booking.model.Club;
+import com.theliems.sport_booking.model.ClubSportType;
 import com.theliems.sport_booking.model.SportType;
 import com.theliems.sport_booking.repository.ClubRepository;
+import com.theliems.sport_booking.repository.ClubSportTypeRepository;
 import com.theliems.sport_booking.service.ClubService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/clubs")
@@ -16,10 +19,15 @@ public class ClubController {
 
     private final ClubService clubService;
     private final ClubRepository clubRepository;
+    private final ClubSportTypeRepository clubSportTypeRepo;
 
-    public ClubController(ClubService clubService, ClubRepository clubRepository) {
+    public ClubController(
+            ClubService clubService,
+            ClubRepository clubRepository,
+            ClubSportTypeRepository clubSportTypeRepo) {
         this.clubService = clubService;
         this.clubRepository = clubRepository;
+        this.clubSportTypeRepo = clubSportTypeRepo;
     }
 
     // GET ALL
@@ -81,8 +89,48 @@ public class ClubController {
         return ResponseEntity.ok("Xóa club thành công");
     }
 
+    // Lấy sport types của club
     @GetMapping("/{clubId}/sport-types")
     public List<SportType> getSportTypesByClub(@PathVariable int clubId) {
         return clubRepository.findSportTypesByClubId(clubId);
+    }
+
+    // Thêm sport type cho club
+    @PostMapping("/{clubId}/sport-types")
+    public ResponseEntity<?> addSportTypeToClub(
+            @PathVariable int clubId,
+            @RequestBody Map<String, Integer> body
+    ) {
+        int sportTypeId = body.get("sportTypeId");
+
+        if (clubSportTypeRepo.existsByClubIdAndSportTypeId(clubId, sportTypeId)) {
+            return ResponseEntity.badRequest().body("Club đã có loại sân này");
+        }
+
+        ClubSportType cst = new ClubSportType();
+        cst.setClubId(clubId);
+        cst.setSportTypeId(sportTypeId);
+        clubSportTypeRepo.save(cst);
+
+        return ResponseEntity.ok("Gán loại sân cho club thành công");
+    }
+
+    // Gỡ sport type khỏi club
+    @DeleteMapping("/{clubId}/sport-types/{sportTypeId}")
+    public ResponseEntity<?> removeSportTypeFromClub(
+            @PathVariable int clubId,
+            @PathVariable int sportTypeId
+    ) {
+        int courtCount =
+                clubSportTypeRepo.countCourtByClubAndSportType(clubId, sportTypeId);
+
+        if (courtCount > 0) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Không thể xóa: vẫn còn court thuộc loại sân này");
+        }
+
+        clubSportTypeRepo.deleteByClubIdAndSportTypeId(clubId, sportTypeId);
+        return ResponseEntity.ok("Đã gỡ loại sân khỏi club");
     }
 }
