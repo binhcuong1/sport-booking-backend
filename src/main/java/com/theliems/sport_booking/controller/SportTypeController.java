@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/sport-type")
+@RequestMapping("/api/sport-types")
 public class SportTypeController {
 
     private final SportTypeService service;

@@ -1,6 +1,8 @@
 package com.theliems.sport_booking.controller;
 
 import com.theliems.sport_booking.model.Club;
+import com.theliems.sport_booking.model.SportType;
+import com.theliems.sport_booking.repository.ClubRepository;
 import com.theliems.sport_booking.service.ClubService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +15,11 @@ import java.util.List;
 public class ClubController {
 
     private final ClubService clubService;
+    private final ClubRepository clubRepository;
 
-    public ClubController(ClubService clubService) {
+    public ClubController(ClubService clubService, ClubRepository clubRepository) {
         this.clubService = clubService;
+        this.clubRepository = clubRepository;
     }
 
     // GET ALL
@@ -75,5 +79,10 @@ public class ClubController {
 
         clubService.deleteClub(id);
         return ResponseEntity.ok("Xóa club thành công");
+    }
+
+    @GetMapping("/{clubId}/sport-types")
+    public List<SportType> getSportTypesByClub(@PathVariable int clubId) {
+        return clubRepository.findSportTypesByClubId(clubId);
     }
 }
