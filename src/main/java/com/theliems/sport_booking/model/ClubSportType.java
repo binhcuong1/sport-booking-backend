@@ -12,15 +12,14 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@IdClass(ClubSportTypeId.class)
 public class ClubSportType {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "club_id", nullable = false)
+    @Column(name = "club_id")
     private Integer clubId;
 
-    @Column(name = "sport_type_id", nullable = false)
+    @Id
+    @Column(name = "sport_type_id")
     private Integer sportTypeId;
 }
