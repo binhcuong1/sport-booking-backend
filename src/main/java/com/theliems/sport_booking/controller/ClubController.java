@@ -20,32 +20,22 @@ import java.util.Map;
 public class ClubController {
 
     private final ClubService clubService;
-    private final ClubRepository clubRepository;
-    private final ClubSportTypeRepository clubSportTypeRepo;
-    private final CourtRepository courtRepo;
 
-    public ClubController(
-            ClubService clubService,
-            ClubRepository clubRepository,
-            ClubSportTypeRepository clubSportTypeRepo,
-            CourtRepository courtRepo) {
+    public ClubController(ClubService clubService) {
         this.clubService = clubService;
-        this.clubRepository = clubRepository;
-        this.clubSportTypeRepo = clubSportTypeRepo;
-        this.courtRepo = courtRepo;
     }
 
-    // GET ALL
+    // ================= USER / GUEST =================
+
     @GetMapping
     public List<Club> getAllClubs() {
-        return clubService.getAllClub();
+        return clubService.getAll();
     }
 
-    // GET BY ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getClubById(@PathVariable int id) {
-        Club club = clubService.getClubById(id);
-        if (club == null) {
+        Club club = clubService.getById(id);
+        if (club == null || Boolean.TRUE.equals(club.getIsDeleted())) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body("Không tìm thấy club");
@@ -53,98 +43,80 @@ public class ClubController {
         return ResponseEntity.ok(club);
     }
 
-    // CREATE
+    // ================= ADMIN =================
+
     @PostMapping
     public ResponseEntity<?> createClub(@RequestBody Club club) {
-        clubService.createClub(club);
+        clubService.create(club);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body("Tạo club thành công");
     }
 
-    // UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<?> updateClub(
             @PathVariable int id,
             @RequestBody Club club
     ) {
-        Club existing = clubService.getClubById(id);
-        if (existing == null) {
+        Club updated = clubService.update(id, club);
+        if (updated == null) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body("Club không tồn tại");
         }
-
-        club.setClubId(id);
-        clubService.updateClub(club);
         return ResponseEntity.ok("Cập nhật club thành công");
     }
 
-    // DELETE (soft delete)
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteClub(@PathVariable int id) {
-        Club club = clubService.getClubById(id);
-        if (club == null) {
+        boolean deleted = clubService.softDelete(id);
+        if (!deleted) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body("Club không tồn tại");
         }
-
-        clubService.deleteClub(id);
         return ResponseEntity.ok("Xóa club thành công");
     }
 
-    // Lấy sport types của club
+    // ================= SPORT TYPE =================
+
     @GetMapping("/{clubId}/sport-types")
-    public List<SportType> getSportTypesByClub(@PathVariable int clubId) {
-        return clubRepository.findSportTypesByClubId(clubId);
+    public ResponseEntity<?> getSportTypes(@PathVariable int clubId) {
+        return ResponseEntity.ok(
+                clubService.getSportTypesByClub(clubId)
+        );
     }
 
-    // Thêm sport type cho club
     @PostMapping("/{clubId}/sport-types")
     public ResponseEntity<?> addSportTypeToClub(
             @PathVariable int clubId,
             @RequestBody Map<String, Integer> body
     ) {
-        int sportTypeId = body.get("sportTypeId");
-
-        if (clubSportTypeRepo.existsByClubIdAndSportTypeId(clubId, sportTypeId)) {
-            return ResponseEntity.badRequest().body("Club đã có loại sân này");
-        }
-
-        ClubSportType cst = new ClubSportType();
-        cst.setClubId(clubId);
-        cst.setSportTypeId(sportTypeId);
-        clubSportTypeRepo.save(cst);
-
+        clubService.addSportTypeToClub(
+                clubId,
+                body.get("sportTypeId")
+        );
         return ResponseEntity.ok("Gán loại sân cho club thành công");
     }
 
-    // Gỡ sport type khỏi club
     @DeleteMapping("/{clubId}/sport-types/{sportTypeId}")
     public ResponseEntity<?> removeSportTypeFromClub(
             @PathVariable int clubId,
             @PathVariable int sportTypeId
     ) {
-        int courtCount =
-                clubSportTypeRepo.countCourtByClubAndSportType(clubId, sportTypeId);
-
-        if (courtCount > 0) {
-            return ResponseEntity
-                    .badRequest()
-                    .body("Không thể xóa: vẫn còn court thuộc loại sân này");
-        }
-
-        clubSportTypeRepo.deleteByClubIdAndSportTypeId(clubId, sportTypeId);
+        clubService.removeSportTypeFromClub(clubId, sportTypeId);
         return ResponseEntity.ok("Đã gỡ loại sân khỏi club");
     }
 
-    // Load court theo club + sport type
+    // ================= COURT =================
+
     @GetMapping("/{clubId}/sport-types/{sportTypeId}/courts")
-    public List<Court> getCourtsBySportType(
+    public ResponseEntity<?> getCourtsBySportType(
             @PathVariable int clubId,
             @PathVariable int sportTypeId
     ) {
-        return courtRepo.findByClubAndSportType(clubId, sportTypeId);
+        return ResponseEntity.ok(
+                clubService.getCourtsByClubAndSportType(clubId, sportTypeId)
+        );
     }
 }
