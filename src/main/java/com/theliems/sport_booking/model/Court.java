@@ -3,23 +3,29 @@ package com.theliems.sport_booking.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Entity
-@Table(name = "Court")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "court")
 public class Court {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer court_id;
+    @Column(name = "court_id")
+    private Integer courtId;
 
-    private String court_name;
+    @Column(name = "sport_type_id")
+    private Integer sportTypeId;
 
-    private Boolean is_deleted = false;
+    @Column(name = "court_name")
+    private String courtName;
 
-    @ManyToOne
-    @JoinColumn(name = "sport_type_id")
-    private SportType sportType;
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
+
+    @Column(name = "club_id", nullable = false)
+    private Integer clubId;
 }
+
