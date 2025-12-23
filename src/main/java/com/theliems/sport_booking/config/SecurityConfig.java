@@ -3,7 +3,9 @@ package com.theliems.sport_booking.config;
 import com.theliems.sport_booking.config.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -33,41 +35,51 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
+//        http
+//                //  BẮT BUỘC PHẢI CÓ – FIX FAILED TO FETCH
+//                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+//
+//                //  API → tắt CSRF
+//                .csrf(csrf -> csrf.disable())
+//
+//                //  Không dùng session
+//                .sessionManagement(sm ->
+//                        sm.sessionCreationPolicy(
+//                                org.springframework.security.config.http.SessionCreationPolicy.STATELESS
+//                        )
+//                )
+//
+//                .authorizeHttpRequests(auth -> auth
+//                        //  Cho phép preflight CORS
+//                        .requestMatchers(
+//                                org.springframework.http.HttpMethod.OPTIONS, "/**"
+//                        ).permitAll()
+//
+//                        //  Auth API không cần JWT
+//                        .requestMatchers("/api/auth/**").permitAll()
+//
+//                        //  API khác cần token
+//                        .requestMatchers("/api/**").authenticated()
+//
+//                        //  File tĩnh / html
+//                        .anyRequest().permitAll()
+//                )
+//
+//                // JWT filter
+//                .addFilterBefore(
+//                        jwtAuthenticationFilter,
+//                        UsernamePasswordAuthenticationFilter.class
+//                );
+
         http
-                //  BẮT BUỘC PHẢI CÓ – FIX FAILED TO FETCH
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                //  API → tắt CSRF
                 .csrf(csrf -> csrf.disable())
-
-                //  Không dùng session
-                .sessionManagement(sm ->
-                        sm.sessionCreationPolicy(
-                                org.springframework.security.config.http.SessionCreationPolicy.STATELESS
-                        )
-                )
-
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        //  Cho phép preflight CORS
-                        .requestMatchers(
-                                org.springframework.http.HttpMethod.OPTIONS, "/**"
-                        ).permitAll()
-
-                        //  Auth API không cần JWT
-                        .requestMatchers("/api/auth/**").permitAll()
-
-                        //  API khác cần token
-                        .requestMatchers("/api/**").authenticated()
-
-                        //  File tĩnh / html
-                        .anyRequest().permitAll()
-                )
-
-                // JWT filter
-                .addFilterBefore(
-                        jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class
+                        .anyRequest().permitAll()   //  CHO PHÉP TẤT CẢ
                 );
+
+
+
 
         return http.build();
     }
