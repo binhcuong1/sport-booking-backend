@@ -2,7 +2,9 @@ package com.theliems.sport_booking.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalTime;
+import java.util.List;
 
 @Entity
 @Table(name = "Club")
@@ -34,6 +36,22 @@ public class Club {
     @Column(name = "contact_phone")
     private String contactPhone;
 
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
+
+
+    // 1 Club có nhiều SportType (Club_Sport_Type)
+    @ManyToMany
+    @JoinTable(
+            name = "Club_Sport_Type",
+            joinColumns = @JoinColumn(name = "club_id"),
+            inverseJoinColumns = @JoinColumn(name = "sport_type_id")
+    )
+    private List<SportType> sportTypes;
 }
