@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.theliems.sport_booking.model.Profile;
 import com.theliems.sport_booking.repository.ProfileRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDateTime;
@@ -45,23 +46,21 @@ public class AuthService {
         this.googleClientId = googleClientId;
         this.profileRepository = profileRepository;
     }
+    @Transactional
     public void register(String email, String password) {
 
         if (accountRepository.existsByEmail(email)) {
             throw new RuntimeException("Email đã tồn tại");
         }
 
-        // tạo account
         Account account = new Account();
         account.setEmail(email);
         account.setPassword(passwordEncoder.encode(password));
         account.setRole(Account.Role.user);
         accountRepository.save(account);
 
-        // xoá OTP cũ
         otpVerificationRepository.deleteByEmail(email);
 
-        // tao OTP
         String otp = String.valueOf(100000 + new Random().nextInt(900000));
 
         OtpVerification otpEntity = new OtpVerification();
@@ -69,8 +68,6 @@ public class AuthService {
         otpEntity.setOtpHash(passwordEncoder.encode(otp));
         otpEntity.setExpiredAt(LocalDateTime.now().plusMinutes(5));
         otpVerificationRepository.save(otpEntity);
-
-        //gửi email
         mailService.sendOtp(email, otp);
     }
     private void createDefaultProfile(Account account) {
@@ -90,6 +87,7 @@ public class AuthService {
 
 
     // verify otp
+    @Transactional
     public void verifyOtp(String email, String otp) {
 
         OtpVerification otpEntity = otpVerificationRepository.findByEmail(email)
@@ -171,9 +169,4 @@ public class AuthService {
             throw new RuntimeException("Google login failed");
         }
     }
-
-
-
-
-
 }

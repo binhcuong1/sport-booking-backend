@@ -43,17 +43,21 @@ public class AuthController {
         return ResponseEntity.ok("OTP đã được gửi tới email");
     }
 
-    // verify OTP
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> body) {
+        try {
+            String email = body.get("email");
+            String otp = body.get("otp");
 
-        String email = body.get("email");
-        String otp = body.get("otp");
+            authService.verifyOtp(email, otp);
 
-        authService.verifyOtp(email, otp);
+            return ResponseEntity.ok("Xác thực OTP thành công");
 
-        return ResponseEntity.ok("Xác thực OTP thành công");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
