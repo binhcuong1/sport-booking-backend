@@ -48,18 +48,17 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        //  Cho phép preflight CORS
-                        .requestMatchers(
-                                org.springframework.http.HttpMethod.OPTIONS, "/**"
-                        ).permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
 
-                        //  Auth API không cần JWT
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // chỉ mở login / google / register
+                        .requestMatchers("/api/auth/login", "/api/auth/google", "/api/auth/register").permitAll()
 
-                        //  API khác cần token
+                        // đổi mk phải có JWT
+                        .requestMatchers("/api/auth/change-password").authenticated()
+
+                        // còn lại /api/** cần JWT
                         .requestMatchers("/api/**").authenticated()
 
-                        //  File tĩnh / html
                         .anyRequest().permitAll()
                 )
 

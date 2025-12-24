@@ -158,7 +158,7 @@ public class AuthService {
                         Account acc = new Account();
                         acc.setEmail(email);
                         acc.setRole(Account.Role.user);
-                        acc.setPassword("GOOGLE_LOGIN");
+                        acc.setPassword("");
                         accountRepository.save(acc);
                         createDefaultProfile(acc);
 
