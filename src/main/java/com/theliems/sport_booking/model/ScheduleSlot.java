@@ -41,4 +41,23 @@ public class ScheduleSlot {
 
     @Column(name = "price")
     private Double price;
+
+    public ScheduleSlot(
+            Integer courtScheduleId,
+            Integer clubId,
+            Integer courtId,
+            LocalDate date,
+            LocalTime st,
+            LocalTime et,
+            String status,
+            Double price) {
+        this.clubId = clubId;
+        this.courtId = courtId;
+        this.date = date;
+        this.startTime = st;
+        this.endTime = et;
+        this.status = CourtScheduleStatus.valueOf(status);
+        this.price = price;
+
+    }
 }
