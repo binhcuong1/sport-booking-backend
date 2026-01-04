@@ -119,18 +119,30 @@ public class AuthController {
                 .findByAccount_AccountId(account.getAccountId())
                 .orElse(null);
 
-        return ResponseEntity.ok(Map.of(
-                "token", jwt,
-                "account", Map.of(
-                        "id", account.getAccountId(),
-                        "email", account.getEmail(),
-                        "role", account.getRole(),
-                        "profile", profile == null ? null : Map.of(
-                                "profileId", profile.getProfile_id(),
-                                "fullname", profile.getFullname()
-                        )
-                )
-        ));
+        // --- SỬA LỖI: Dùng HashMap thay vì Map.of ---
+
+        // 1. Tạo Map cho thông tin Account
+        Map<String, Object> accountMap = new HashMap<>();
+        accountMap.put("id", account.getAccountId());
+        accountMap.put("email", account.getEmail());
+        accountMap.put("role", account.getRole());
+
+        // 2. Xử lý Profile (Cho phép null)
+        if (profile != null) {
+            Map<String, Object> profileMap = new HashMap<>();
+            profileMap.put("profileId", profile.getProfile_id());
+            profileMap.put("fullname", profile.getFullname());
+            accountMap.put("profile", profileMap);
+        } else {
+            accountMap.put("profile", null); // HashMap cho phép put null
+        }
+
+        // 3. Tạo Map tổng để trả về
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", jwt);
+        response.put("account", accountMap);
+
+        return ResponseEntity.ok(response);
     }
 
     // GET /api/auth/has-password

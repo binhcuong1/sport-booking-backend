@@ -1,5 +1,7 @@
 package com.theliems.sport_booking.controller;
 
+import com.theliems.sport_booking.model.Booking;
+import com.theliems.sport_booking.repository.BookingRepository;
 import com.theliems.sport_booking.service.VNPayService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,6 +18,7 @@ import java.util.Map;
 public class PaymentController {
 
     private final VNPayService vnpayService;
+    private final BookingRepository bookingRepo;
 
     @PostMapping("/vnpay/create")
     public ResponseEntity<?> createPayment(
@@ -23,14 +26,18 @@ public class PaymentController {
             HttpServletRequest request
     ) {
         Long bookingId = body.get("bookingId");
-        Long amount = body.get("amount");
+
+        Booking booking = bookingRepo.findById(Math.toIntExact(bookingId))
+                .orElseThrow(() -> new RuntimeException("Booking không tồn tại"));
 
         return ResponseEntity.ok(
-                vnpayService.createPayment(bookingId, amount, request)
+                vnpayService.createPayment(
+                        bookingId,
+                        booking.getTotalPrice().longValue(),
+                        request
+                )
         );
     }
-
-
 
     @GetMapping("/vnpay/return")
     public void vnpayReturn(
@@ -38,8 +45,10 @@ public class PaymentController {
             HttpServletResponse response
     ) throws IOException {
 
-        String redirectUrl = vnpayService.handleReturn(request);
+        String redirectUrl = vnpayService.buildReturnRedirectUrl(request);
         response.sendRedirect(redirectUrl);
     }
-}
 
+
+
+}
