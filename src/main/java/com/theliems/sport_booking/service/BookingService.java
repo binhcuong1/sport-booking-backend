@@ -9,7 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +25,7 @@ public class BookingService {
     @Transactional
     public Integer createBooking(CreateBookingRequest req) {
 
-        // 1️⃣ Check slot hợp lệ
+        // Check slot hợp lệ
         List<ScheduleSlot> slots = slotRepo.findAllById(
                 req.getSelectedSlots()
                         .stream()
@@ -36,7 +39,7 @@ public class BookingService {
             }
         }
 
-        // 2️⃣ Tạo booking
+        // Tạo booking
         Booking booking = new Booking();
         booking.setClubId(req.getClubId());
         booking.setProfileId(req.getProfileId());
@@ -49,7 +52,7 @@ public class BookingService {
 
         bookingRepo.save(booking);
 
-        // 3️⃣ Insert booking_court_schedule + update slot → booked
+        // Insert booking_court_schedule + update slot → booked
         for (ScheduleSlot slot : slots) {
             BookingCourtSchedule bcs = new BookingCourtSchedule();
             bcs.setBookingId(booking.getBookingId());
@@ -61,5 +64,99 @@ public class BookingService {
         }
 
         return booking.getBookingId();
+    }
+    public List<Map<String, Object>> getBookingHistory(Integer profileId) {
+
+        List<Booking> bookings =
+                bookingRepo.findByProfileIdOrderByCreatedAtDesc(profileId);
+
+        return bookings.stream().map(b -> {
+            Map<String, Object> m = new HashMap<>();
+
+            m.put("id", b.getBookingId());
+            m.put("club", "CLB #" + b.getClubId());   // FE chỉ cần text
+            m.put("court", "Sân đã đặt");
+
+            m.put("date", b.getCreatedAt()
+                    .toLocalDate()
+                    .toString());
+
+            m.put("time", b.getTotalTime() + " giờ");
+
+            // QUAN TRỌNG: map enum → FE status
+            m.put("status", mapStatus(b.getBookingStatus()));
+
+            return m;
+        }).collect(Collectors.toList());
+    }
+
+    public Map<String, Object> getBookingDetail(Integer bookingId) {
+
+        Booking b = bookingRepo.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking không tồn tại"));
+
+        Map<String, Object> m = new HashMap<>();
+
+        m.put("id", b.getBookingId());
+        m.put("club", "CLB #" + b.getClubId());
+        m.put("court", "Sân đã đặt");
+
+        m.put("date", b.getCreatedAt()
+                .toLocalDate()
+                .toString());
+
+        m.put("time", b.getTotalTime() + " giờ");
+
+        m.put("totalPrice", b.getTotalPrice());
+        m.put("paymentMethod", b.getPaymentMethod() != null
+                ? b.getPaymentMethod().name()
+                : null);
+
+        m.put("note", b.getNote());
+        m.put("status", mapStatus(b.getBookingStatus()));
+        m.put("createdAt", b.getCreatedAt().toString());
+
+        return m;
+    }
+
+
+    // ================== MAP STATUS ==================
+    private String mapStatus(BookingStatus status) {
+        if (status == null) return "pending";
+
+        return switch (status) {
+            case DANG_XU_LY -> "pending";
+            case HOAN_THANH -> "completed";
+            case HUY -> "cancelled";
+        };
+    }
+    public List<Map<String, Object>> getAllBookings() {
+
+        List<Booking> bookings = bookingRepo.findAll();
+
+        return bookings.stream().map(b -> {
+            Map<String, Object> m = new HashMap<>();
+
+            m.put("id", b.getBookingId());
+            m.put("profileId", b.getProfileId());
+            m.put("club", "CLB #" + b.getClubId());
+            m.put("court", "Sân đã đặt");
+            m.put("date", b.getCreatedAt().toLocalDate().toString());
+            m.put("time", b.getTotalTime() + " giờ");
+            m.put("status", mapStatus(b.getBookingStatus()));
+
+            return m;
+        }).collect(Collectors.toList());
+    }
+
+    // admin duyệt / hủy
+    @Transactional
+    public void updateStatus(Integer bookingId, BookingStatus status) {
+
+        Booking booking = bookingRepo.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking không tồn tại"));
+
+        booking.setBookingStatus(status);
+        bookingRepo.save(booking);
     }
 }

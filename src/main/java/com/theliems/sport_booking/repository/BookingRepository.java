@@ -20,5 +20,6 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             @Param("clubId") Integer clubId,
             @Param("status") BookingStatus status
     );
+    java.util.List<Booking> findByProfileIdOrderByCreatedAtDesc(Integer profileId);
 }
 
