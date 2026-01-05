@@ -104,4 +104,23 @@ public class VNPayService {
         }
         return "";
     }
+    public String buildReturnRedirectUrl(HttpServletRequest request) {
+
+        String responseCode = request.getParameter("vnp_ResponseCode");
+        String txnRef = request.getParameter("vnp_TxnRef");
+        String amount = request.getParameter("vnp_Amount");
+
+        if (!"00".equals(responseCode) || txnRef == null) {
+            return "http://localhost:5500/customer/payment-fail.html";
+        }
+
+        String bookingId = txnRef.split("_")[0];
+
+        return "http://127.0.0.1:5500/customer/pages/payment-success.html"
+                + "?bookingId=" + bookingId
+                + "&amount=" + (Long.parseLong(amount) / 100)
+                + "&payMethod=VNPay";
+    }
+
+
 }

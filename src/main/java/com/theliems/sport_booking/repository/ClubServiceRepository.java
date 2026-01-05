@@ -39,4 +39,6 @@ public interface ClubServiceRepository extends JpaRepository<ClubService, ClubSe
         ORDER BY st.type_name, cs.name
         """, nativeQuery = true)
     List<ClubServiceRow> findRowsByClub(@Param("clubId") Integer clubId);
+    List<ClubService> findByClubIdAndIsDeletedFalse(Integer clubId);
+
 }
