@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,21 +24,19 @@ public class BookingService {
     @Transactional
     public Integer createBooking(CreateBookingRequest req) {
 
-        // Check slot hợp lệ
-        List<ScheduleSlot> slots = slotRepo.findAllById(
+        var slots = slotRepo.findAllById(
                 req.getSelectedSlots()
                         .stream()
                         .map(SelectedSlot::getCourtScheduleId)
                         .toList()
         );
 
-        for (ScheduleSlot slot : slots) {
+        for (var slot : slots) {
             if (slot.getStatus() != CourtScheduleStatus.available) {
-                throw new RuntimeException("Slot đã được đặt hoặc bị khóa");
+                throw new RuntimeException("Slot đã được đặt");
             }
         }
 
-        // Tạo booking
         Booking booking = new Booking();
         booking.setClubId(req.getClubId());
         booking.setProfileId(req.getProfileId());
@@ -49,114 +46,122 @@ public class BookingService {
         booking.setTotalTime(req.getTotalTime());
         booking.setTotalPrice(req.getTotalPrice());
         booking.setCreatedAt(LocalDateTime.now());
+        booking.setBookingStatus(BookingStatus.DANG_XU_LY);
 
         bookingRepo.save(booking);
 
-        // Insert booking_court_schedule + update slot → booked
-        for (ScheduleSlot slot : slots) {
+        for (var slot : slots) {
             BookingCourtSchedule bcs = new BookingCourtSchedule();
             bcs.setBookingId(booking.getBookingId());
             bcs.setCourtScheduleId(slot.getCourtScheduleId());
             bookingSlotRepo.save(bcs);
 
-            slot.setStatus(CourtScheduleStatus.valueOf("booked"));
+            slot.setStatus(CourtScheduleStatus.booked);
             slotRepo.save(slot);
         }
 
         return booking.getBookingId();
     }
+
     public List<Map<String, Object>> getBookingHistory(Integer profileId) {
 
-        List<Booking> bookings =
-                bookingRepo.findByProfileIdOrderByCreatedAtDesc(profileId);
-
-        return bookings.stream().map(b -> {
-            Map<String, Object> m = new HashMap<>();
-
-            m.put("id", b.getBookingId());
-            m.put("club", "CLB #" + b.getClubId());   // FE chỉ cần text
-            m.put("court", "Sân đã đặt");
-
-            m.put("date", b.getCreatedAt()
-                    .toLocalDate()
-                    .toString());
-
-            m.put("time", b.getTotalTime() + " giờ");
-
-            // QUAN TRỌNG: map enum → FE status
-            m.put("status", mapStatus(b.getBookingStatus()));
-
-            return m;
-        }).collect(Collectors.toList());
+        return bookingRepo.findUserBookingsWithClubName(profileId)
+                .stream()
+                .map(r -> {
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("id", r[0]);
+                    m.put("club", r[1]);
+                    m.put("court", "Sân đã đặt");
+                    m.put("time", r[2] + " giờ");
+                    m.put("totalPrice", r[3]);
+                    m.put("paymentMethod", r[4]);
+                    m.put("note", r[5]);
+                    m.put("status", mapStatus((BookingStatus) r[6]));
+                    m.put("date", r[7].toString().substring(0, 10));
+                    return m;
+                })
+                .toList();
     }
+
 
     public Map<String, Object> getBookingDetail(Integer bookingId) {
 
-        Booking b = bookingRepo.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking không tồn tại"));
+        Object[] r = bookingRepo.findBookingDetailWithClubName(bookingId);
+
+        if (r == null || r.length < 8) {
+            throw new RuntimeException("Booking không tồn tại hoặc dữ liệu lỗi");
+        }
 
         Map<String, Object> m = new HashMap<>();
-
-        m.put("id", b.getBookingId());
-        m.put("club", "CLB #" + b.getClubId());
+        m.put("id", r[0]);
+        m.put("club", r[1]);
         m.put("court", "Sân đã đặt");
-
-        m.put("date", b.getCreatedAt()
-                .toLocalDate()
-                .toString());
-
-        m.put("time", b.getTotalTime() + " giờ");
-
-        m.put("totalPrice", b.getTotalPrice());
-        m.put("paymentMethod", b.getPaymentMethod() != null
-                ? b.getPaymentMethod().name()
-                : null);
-
-        m.put("note", b.getNote());
-        m.put("status", mapStatus(b.getBookingStatus()));
-        m.put("createdAt", b.getCreatedAt().toString());
+        m.put("time", r[2] + " giờ");
+        m.put("totalPrice", r[3]);
+        m.put("paymentMethod", r[4]);
+        m.put("note", r[5]);
+        m.put("status", mapStatus((BookingStatus) r[6]));
+        m.put("date", r[7].toString().substring(0, 10));
+        m.put("createdAt", r[7].toString());
 
         return m;
     }
 
+    public List<Map<String, Object>> getBookingsByClub(Integer clubId) {
 
-    // ================== MAP STATUS ==================
+        return bookingRepo.findBookingsWithClubName(clubId)
+                .stream()
+                .map(r -> {
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("id", r[0]);
+                    m.put("club", r[1]);
+                    m.put("profileId", r[2]);
+                    m.put("time", r[3] + " giờ");
+                    m.put("status", mapStatus((BookingStatus) r[4]));
+                    m.put("date", r[5].toString().substring(0, 10));
+                    return m;
+                })
+                .toList();
+    }
+
+    public List<Map<String, Object>> getAllBookings() {
+
+        return bookingRepo.findAllBookingsWithClubName()
+                .stream()
+                .map(r -> {
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("id", r[0]);
+                    m.put("club", r[1]);
+                    m.put("profileId", r[2]);
+                    m.put("time", r[3] + " giờ");
+                    m.put("status", mapStatus((BookingStatus) r[4]));
+                    m.put("date", r[5].toString().substring(0, 10));
+                    return m;
+                })
+                .toList();
+    }
+
+    /* =================================================
+       UPDATE STATUS
+    ================================================= */
+
+    @Transactional
+    public void updateStatus(Integer bookingId, BookingStatus status) {
+        Booking b = bookingRepo.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking không tồn tại"));
+        b.setBookingStatus(status);
+        bookingRepo.save(b);
+    }
+
+    /* =================================================
+       HELPER
+    ================================================= */
+
     private String mapStatus(BookingStatus status) {
-        if (status == null) return "pending";
-
         return switch (status) {
             case DANG_XU_LY -> "pending";
             case HOAN_THANH -> "completed";
             case HUY -> "cancelled";
         };
-    }
-    public List<Map<String, Object>> getAllBookings() {
-
-        List<Booking> bookings = bookingRepo.findAll();
-
-        return bookings.stream().map(b -> {
-            Map<String, Object> m = new HashMap<>();
-
-            m.put("id", b.getBookingId());
-            m.put("profileId", b.getProfileId());
-            m.put("club", "CLB #" + b.getClubId());
-            m.put("court", "Sân đã đặt");
-            m.put("date", b.getCreatedAt().toLocalDate().toString());
-            m.put("time", b.getTotalTime() + " giờ");
-            m.put("status", mapStatus(b.getBookingStatus()));
-
-            return m;
-        }).collect(Collectors.toList());
-    }
-
-    // admin duyệt / hủy
-    @Transactional
-    public void updateStatus(Integer bookingId, BookingStatus status) {
-
-        Booking booking = bookingRepo.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking không tồn tại"));
-
-        booking.setBookingStatus(status);
-        bookingRepo.save(booking);
     }
 }

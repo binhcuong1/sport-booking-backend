@@ -36,14 +36,6 @@ public class BookingController {
                 bookingService.getBookingHistory(profileId)
         );
     }
-
-    // admin xem TẤT CẢ đơn
-    @GetMapping("/all")
-    public ResponseEntity<?> getAllBookings() {
-        return ResponseEntity.ok(
-                bookingService.getAllBookings()
-        );
-    }
     @GetMapping("/{id}")
     public ResponseEntity<?> getBookingDetail(@PathVariable Integer id) {
         return ResponseEntity.ok(
@@ -51,17 +43,34 @@ public class BookingController {
         );
     }
 
+    @GetMapping("/club")
+    public ResponseEntity<?> getBookingsByClub(
+            @RequestParam Integer clubId
+    ) {
+        return ResponseEntity.ok(
+                bookingService.getBookingsByClub(clubId)
+        );
+    }
 
     @PutMapping("/{id}/approve")
     public ResponseEntity<?> approveBooking(@PathVariable Integer id) {
         bookingService.updateStatus(id, BookingStatus.HOAN_THANH);
-        return ResponseEntity.ok(Map.of("success", true));
+        return ResponseEntity.ok(
+                Map.of("success", true)
+        );
     }
 
     @PutMapping("/{id}/cancel")
     public ResponseEntity<?> cancelBooking(@PathVariable Integer id) {
         bookingService.updateStatus(id, BookingStatus.HUY);
-        return ResponseEntity.ok(Map.of("success", true));
+        return ResponseEntity.ok(
+                Map.of("success", true)
+        );
     }
-
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllBookings() {
+        return ResponseEntity.ok(
+                bookingService.getAllBookings()
+        );
+    }
 }
