@@ -37,8 +37,18 @@ public class ClubService {
     // ================= USER =================
 
     public List<Club> getAll() {
-        return clubRepository.findByIsDeletedFalse();
+
+        List<Club> clubs = clubRepository.findByIsDeletedFalse();
+
+        clubs.forEach(club -> {
+            club.setImageUrl(
+                    clubImageRepository.findCoverByClub(club.getClubId())
+            );
+        });
+
+        return clubs;
     }
+
 
     public Club getById(Integer id) {
         return clubRepository.findById(id)

@@ -44,7 +44,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // Các API Auth public
-                        .requestMatchers("/api/auth/login", "/api/auth/google", "/api/auth/register").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/google", "/api/auth/register","/api/bookings").permitAll()
 
                         //  Cho phép TẤT CẢ các request GET trong /api/ không cần đăng nhập
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()

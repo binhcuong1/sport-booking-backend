@@ -21,6 +21,11 @@ public class ClubImage {
     private Boolean isDeleted = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "club_id", insertable = false, updatable = false)
+    @JsonIgnore
+    private Club club;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "image_type_id", insertable = false, updatable = false)
     @JsonIgnore
     private ImageType imageType;
