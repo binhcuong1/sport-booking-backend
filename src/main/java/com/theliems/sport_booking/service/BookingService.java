@@ -137,12 +137,14 @@ public class BookingService {
                     m.put("profileName", r[2]);
                     m.put("profileId", r[3]);
                     m.put("time", r[4] + " giờ");
-                    m.put("status", mapStatus((BookingStatus) r[5]));
-                    m.put("date", r[6].toString().substring(0, 10));
+                    m.put("totalPrice", r[5]);
+                    m.put("status", mapStatus((BookingStatus) r[6]));
+                    m.put("date", r[7].toString().substring(0, 10));
                     return m;
                 })
                 .toList();
     }
+
 
 
     public List<Map<String, Object>> getAllBookings() {
@@ -156,8 +158,9 @@ public class BookingService {
                     m.put("profileName", r[2]);
                     m.put("profileId", r[3]);
                     m.put("time", r[4] + " giờ");
-                    m.put("status", mapStatus((BookingStatus) r[5]));
-                    m.put("date", r[6].toString().substring(0, 10));
+                    m.put("totalPrice", r[5]);
+                    m.put("status", mapStatus((BookingStatus) r[6]));
+                    m.put("date", r[7].toString().substring(0, 10));
                     return m;
                 })
                 .toList();

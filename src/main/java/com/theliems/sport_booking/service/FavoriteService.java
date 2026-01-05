@@ -7,6 +7,7 @@ import com.theliems.sport_booking.model.Profile;
 import com.theliems.sport_booking.repository.ClubRepository;
 import com.theliems.sport_booking.repository.FavoriteRepository;
 import com.theliems.sport_booking.repository.ProfileRepository;
+import com.theliems.sport_booking.repository.ClubImageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,18 +19,30 @@ public class FavoriteService {
     private final FavoriteRepository favoriteRepo;
     private final ProfileRepository profileRepo;
     private final ClubRepository clubRepo;
+    private final ClubImageRepository clubImageRepo;
 
     public FavoriteService(FavoriteRepository favoriteRepo,
                            ProfileRepository profileRepo,
-                           ClubRepository clubRepo) {
+                           ClubRepository clubRepo,
+                           ClubImageRepository clubImageRepo) {
         this.favoriteRepo = favoriteRepo;
         this.profileRepo = profileRepo;
         this.clubRepo = clubRepo;
+        this.clubImageRepo = clubImageRepo;
     }
 
     public List<Club> getFavoriteClubs(Integer profileId) {
-        return favoriteRepo.findFavoriteClubs(profileId);
+
+        List<Club> clubs = favoriteRepo.findFavoriteClubs(profileId);
+
+        for (Club club : clubs) {
+            String cover = clubImageRepo.findCoverByClub(club.getClubId());
+            club.setImageUrl(cover);
+        }
+
+        return clubs;
     }
+
 
     public List<Integer> getFavoriteClubIds(Integer profileId) {
         return favoriteRepo.findFavoriteClubIds(profileId);
