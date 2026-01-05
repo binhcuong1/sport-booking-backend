@@ -115,12 +115,20 @@ public class AuthController {
         Account account = authService.loginWithGoogle(idToken);
         String jwt = jwtService.generateToken(account);
 
+        Profile profile = profileRepo
+                .findByAccount_AccountId(account.getAccountId())
+                .orElse(null);
+
         return ResponseEntity.ok(Map.of(
                 "token", jwt,
                 "account", Map.of(
                         "id", account.getAccountId(),
                         "email", account.getEmail(),
-                        "role", account.getRole()
+                        "role", account.getRole(),
+                        "profile", profile == null ? null : Map.of(
+                                "profileId", profile.getProfile_id(),
+                                "fullname", profile.getFullname()
+                        )
                 )
         ));
     }
