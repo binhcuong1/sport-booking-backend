@@ -34,7 +34,7 @@ public class ClubController {
 
     @GetMapping("/{id:\\d+}")
     public ResponseEntity<?> getClubById(@PathVariable int id) {
-        Club club = clubService.getById(id);
+        Club club = clubService.getClubDetail(id);
         if (club == null || Boolean.TRUE.equals(club.getIsDeleted())) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)

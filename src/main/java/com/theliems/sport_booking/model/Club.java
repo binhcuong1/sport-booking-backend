@@ -45,7 +45,14 @@ public class Club {
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 
+    @Transient
+    private List<CourtSchedule> courts;
 
+    @Transient
+    private List<ClubService> services;
+
+    @Transient
+    private String imageUrl;
     // 1 Club có nhiều SportType (Club_Sport_Type)
     @ManyToMany
     @JoinTable(

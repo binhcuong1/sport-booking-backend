@@ -1,13 +1,7 @@
 package com.theliems.sport_booking.service;
 
-import com.theliems.sport_booking.model.Club;
-import com.theliems.sport_booking.model.ClubSportType;
-import com.theliems.sport_booking.model.Court;
-import com.theliems.sport_booking.model.SportType;
-import com.theliems.sport_booking.repository.ClubRepository;
-import com.theliems.sport_booking.repository.ClubSportTypeRepository;
-import com.theliems.sport_booking.repository.CourtRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.theliems.sport_booking.model.*;
+import com.theliems.sport_booking.repository.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,13 +13,25 @@ public class ClubService {
     private final ClubSportTypeRepository clubSportTypeRepo;
     private final CourtRepository courtRepo;
 
+    // === THÊM ===
+    private final CourtScheduleRepository courtScheduleRepository;
+    private final ClubServiceRepository clubServiceRepository;
+    private final ClubImageRepository clubImageRepository;
+
     public ClubService(
             ClubRepository clubRepository,
             ClubSportTypeRepository clubSportTypeRepo,
-            CourtRepository courtRepo) {
+            CourtRepository courtRepo,
+            CourtScheduleRepository courtScheduleRepository,
+            ClubServiceRepository clubServiceRepository,
+            ClubImageRepository clubImageRepository
+    ) {
         this.clubRepository = clubRepository;
         this.clubSportTypeRepo = clubSportTypeRepo;
         this.courtRepo = courtRepo;
+        this.courtScheduleRepository = courtScheduleRepository;
+        this.clubServiceRepository = clubServiceRepository;
+        this.clubImageRepository = clubImageRepository;
     }
 
     // ================= USER =================
@@ -148,5 +154,33 @@ public class ClubService {
 
         return courtRepo.findByClubAndSportType(clubId, sportTypeId);
     }
-}
 
+    // ================= CLUB DETAIL (NO DTO) =================
+
+    public Club getClubDetail(int clubId) {
+
+        Club club = clubRepository.findById(clubId)
+                .filter(c -> !Boolean.TRUE.equals(c.getIsDeleted()))
+                .orElseThrow(() -> new RuntimeException("Club không tồn tại"));
+
+        // COURTS + SCHEDULE
+        club.setCourts(
+                courtScheduleRepository.findByCourt_ClubIdAndStatusNot(
+                        clubId,
+                        CourtSchedule.Status.blocked
+                )
+        );
+
+        // SERVICES
+        club.setServices(
+                clubServiceRepository.findByClubIdAndIsDeletedFalse(clubId)
+        );
+
+        //  IMAGE COVER
+        club.setImageUrl(
+                clubImageRepository.findCoverByClub(clubId)
+        );
+
+        return club;
+    }
+}
