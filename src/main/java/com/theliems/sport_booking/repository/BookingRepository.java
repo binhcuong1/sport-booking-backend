@@ -10,6 +10,9 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
+    /* =================================================
+       CHECK USER HAS BOOKING WITH STATUS
+    ================================================= */
 
     @Query("""
         SELECT (COUNT(b) > 0)
@@ -24,11 +27,15 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             @Param("status") BookingStatus status
     );
 
+    /* =================================================
+       USER – BOOKING HISTORY
+    ================================================= */
 
     @Query("""
         SELECT
             b.bookingId,
             c.clubName,
+            p.fullname,
             b.totalTime,
             b.totalPrice,
             b.paymentMethod,
@@ -37,6 +44,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             b.createdAt
         FROM Booking b
         JOIN Club c ON b.clubId = c.clubId
+        JOIN Profile p ON b.profileId = p.id
         WHERE b.profileId = :profileId
         ORDER BY b.createdAt DESC
     """)
@@ -44,6 +52,9 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             @Param("profileId") Integer profileId
     );
 
+    /* =================================================
+       BOOKING DETAIL
+    ================================================= */
 
     @Query("""
         SELECT
@@ -63,17 +74,22 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             @Param("bookingId") Integer bookingId
     );
 
+    /* =================================================
+       ADMIN – BOOKINGS BY CLUB
+    ================================================= */
 
     @Query("""
         SELECT
             b.bookingId,
             c.clubName,
+            p.fullname,
             b.profileId,
             b.totalTime,
             b.bookingStatus,
             b.createdAt
         FROM Booking b
         JOIN Club c ON b.clubId = c.clubId
+        JOIN Profile p ON b.profileId = p.id
         WHERE b.clubId = :clubId
         ORDER BY b.createdAt DESC
     """)
@@ -81,16 +97,22 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             @Param("clubId") Integer clubId
     );
 
+    /* =================================================
+       ADMIN – ALL BOOKINGS
+    ================================================= */
+
     @Query("""
         SELECT
             b.bookingId,
             c.clubName,
+            p.fullname,
             b.profileId,
             b.totalTime,
             b.bookingStatus,
             b.createdAt
         FROM Booking b
         JOIN Club c ON b.clubId = c.clubId
+        JOIN Profile p ON b.profileId = p.id
         ORDER BY b.createdAt DESC
     """)
     List<Object[]> findAllBookingsWithClubName();

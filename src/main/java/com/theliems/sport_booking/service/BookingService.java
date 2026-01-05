@@ -21,6 +21,7 @@ public class BookingService {
     private final BookingCourtScheduleRepository bookingSlotRepo;
     private final ScheduleSlotRepository slotRepo;
 
+
     @Transactional
     public Integer createBooking(CreateBookingRequest req) {
 
@@ -63,6 +64,7 @@ public class BookingService {
         return booking.getBookingId();
     }
 
+
     public List<Map<String, Object>> getBookingHistory(Integer profileId) {
 
         return bookingRepo.findUserBookingsWithClubName(profileId)
@@ -71,13 +73,14 @@ public class BookingService {
                     Map<String, Object> m = new HashMap<>();
                     m.put("id", r[0]);
                     m.put("club", r[1]);
+                    m.put("profileName", r[2]);
                     m.put("court", "Sân đã đặt");
-                    m.put("time", r[2] + " giờ");
-                    m.put("totalPrice", r[3]);
-                    m.put("paymentMethod", r[4]);
-                    m.put("note", r[5]);
-                    m.put("status", mapStatus((BookingStatus) r[6]));
-                    m.put("date", r[7].toString().substring(0, 10));
+                    m.put("time", r[3] + " giờ");
+                    m.put("totalPrice", r[4]);
+                    m.put("paymentMethod", r[5]);
+                    m.put("note", r[6]);
+                    m.put("status", mapStatus((BookingStatus) r[7]));
+                    m.put("date", r[8].toString().substring(0, 10));
                     return m;
                 })
                 .toList();
@@ -86,10 +89,24 @@ public class BookingService {
 
     public Map<String, Object> getBookingDetail(Integer bookingId) {
 
-        Object[] r = bookingRepo.findBookingDetailWithClubName(bookingId);
+        Object result = bookingRepo.findBookingDetailWithClubName(bookingId);
 
-        if (r == null || r.length < 8) {
-            throw new RuntimeException("Booking không tồn tại hoặc dữ liệu lỗi");
+        if (result == null) {
+            throw new RuntimeException("Booking không tồn tại");
+        }
+
+        Object[] r;
+
+        // FIX trường hợp Hibernate trả Object[1][]
+        if (result instanceof Object[]) {
+            Object[] tmp = (Object[]) result;
+            if (tmp.length == 1 && tmp[0] instanceof Object[]) {
+                r = (Object[]) tmp[0];
+            } else {
+                r = tmp;
+            }
+        } else {
+            throw new RuntimeException("Dữ liệu booking không hợp lệ");
         }
 
         Map<String, Object> m = new HashMap<>();
@@ -107,6 +124,8 @@ public class BookingService {
         return m;
     }
 
+
+
     public List<Map<String, Object>> getBookingsByClub(Integer clubId) {
 
         return bookingRepo.findBookingsWithClubName(clubId)
@@ -115,14 +134,16 @@ public class BookingService {
                     Map<String, Object> m = new HashMap<>();
                     m.put("id", r[0]);
                     m.put("club", r[1]);
-                    m.put("profileId", r[2]);
-                    m.put("time", r[3] + " giờ");
-                    m.put("status", mapStatus((BookingStatus) r[4]));
-                    m.put("date", r[5].toString().substring(0, 10));
+                    m.put("profileName", r[2]);
+                    m.put("profileId", r[3]);
+                    m.put("time", r[4] + " giờ");
+                    m.put("status", mapStatus((BookingStatus) r[5]));
+                    m.put("date", r[6].toString().substring(0, 10));
                     return m;
                 })
                 .toList();
     }
+
 
     public List<Map<String, Object>> getAllBookings() {
 
@@ -132,18 +153,16 @@ public class BookingService {
                     Map<String, Object> m = new HashMap<>();
                     m.put("id", r[0]);
                     m.put("club", r[1]);
-                    m.put("profileId", r[2]);
-                    m.put("time", r[3] + " giờ");
-                    m.put("status", mapStatus((BookingStatus) r[4]));
-                    m.put("date", r[5].toString().substring(0, 10));
+                    m.put("profileName", r[2]);
+                    m.put("profileId", r[3]);
+                    m.put("time", r[4] + " giờ");
+                    m.put("status", mapStatus((BookingStatus) r[5]));
+                    m.put("date", r[6].toString().substring(0, 10));
                     return m;
                 })
                 .toList();
     }
 
-    /* =================================================
-       UPDATE STATUS
-    ================================================= */
 
     @Transactional
     public void updateStatus(Integer bookingId, BookingStatus status) {
@@ -153,9 +172,6 @@ public class BookingService {
         bookingRepo.save(b);
     }
 
-    /* =================================================
-       HELPER
-    ================================================= */
 
     private String mapStatus(BookingStatus status) {
         return switch (status) {
