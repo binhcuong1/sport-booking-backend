@@ -18,7 +18,7 @@ public interface StatsRepository extends JpaRepository<Booking, Integer> {
         SELECT COUNT(*)
         FROM booking
         WHERE club_id IN :clubIds
-          AND booking_status = 'HOAN_THANH'
+          AND booking_status = 'hoàn thành'
           AND DATE(created_at) BETWEEN :from AND :to
     """, nativeQuery = true)
     Integer totalBooking(List<Integer> clubIds, LocalDate from, LocalDate to);
@@ -27,7 +27,7 @@ public interface StatsRepository extends JpaRepository<Booking, Integer> {
         SELECT COALESCE(SUM(total_price),0)
         FROM booking
         WHERE club_id IN :clubIds
-          AND booking_status = 'HOAN_THANH'
+          AND booking_status = 'hoàn thành'
           AND DATE(created_at) BETWEEN :from AND :to
     """, nativeQuery = true)
     Double totalRevenue(List<Integer> clubIds, LocalDate from, LocalDate to);
@@ -36,7 +36,7 @@ public interface StatsRepository extends JpaRepository<Booking, Integer> {
         SELECT COALESCE(SUM(total_time),0)
         FROM booking
         WHERE club_id IN :clubIds
-          AND booking_status = 'HOAN_THANH'
+          AND booking_status = 'hoàn thành'
           AND DATE(created_at) BETWEEN :from AND :to
     """, nativeQuery = true)
     Integer totalHours(List<Integer> clubIds, LocalDate from, LocalDate to);
@@ -45,7 +45,7 @@ public interface StatsRepository extends JpaRepository<Booking, Integer> {
         SELECT COUNT(DISTINCT profile_id)
         FROM booking
         WHERE club_id IN :clubIds
-          AND booking_status = 'HOAN_THANH'
+          AND booking_status = 'hoàn thành'
           AND DATE(created_at) BETWEEN :from AND :to
     """, nativeQuery = true)
     Integer totalCustomers(List<Integer> clubIds, LocalDate from, LocalDate to);
@@ -64,7 +64,7 @@ public interface StatsRepository extends JpaRepository<Booking, Integer> {
         SELECT DATE(created_at) as d, SUM(total_price)
         FROM booking
         WHERE club_id IN :clubIds
-          AND booking_status = 'HOAN_THANH'
+          AND booking_status = 'hoàn thành'
           AND DATE(created_at) BETWEEN :from AND :to
         GROUP BY d
         ORDER BY d
@@ -75,7 +75,7 @@ public interface StatsRepository extends JpaRepository<Booking, Integer> {
         SELECT DATE_FORMAT(created_at,'%Y-%m') as m, SUM(total_price)
         FROM booking
         WHERE club_id IN :clubIds
-          AND booking_status = 'HOAN_THANH'
+          AND booking_status = 'hoàn thành'
           AND DATE(created_at) BETWEEN :from AND :to
         GROUP BY m
         ORDER BY m
@@ -90,7 +90,7 @@ public interface StatsRepository extends JpaRepository<Booking, Integer> {
                SUM(b.total_price)
         FROM club c
         JOIN booking b ON b.club_id = c.club_id
-        WHERE b.booking_status = 'HOAN_THANH'
+        WHERE b.booking_status = 'hoàn thành'
           AND DATE(b.created_at) BETWEEN :from AND :to
           AND c.club_id IN (
               SELECT club_id FROM account_club WHERE account_id = :accountId
@@ -138,7 +138,7 @@ public interface StatsRepository extends JpaRepository<Booking, Integer> {
         FROM booking b
         JOIN profile p ON b.profile_id = p.profile_id
         WHERE b.club_id IN :clubIds
-          AND b.booking_status = 'HOAN_THANH'
+          AND b.booking_status = 'hoàn thành'
           AND DATE(b.created_at) BETWEEN :from AND :to
         GROUP BY p.profile_id
         ORDER BY totalSpent DESC
