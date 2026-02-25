@@ -85,6 +85,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             p.fullname,
             b.profileId,
             b.totalTime,
+            b.totalPrice,
             b.bookingStatus,
             b.createdAt
         FROM Booking b
